@@ -3,7 +3,7 @@ defmodule Invoices.InvoicePage.Invoice do
   import Ecto.Changeset
 
   schema "invoices" do
-    @vendors [:asure, :flexsoure, :uds, :american_courier, :pbg, :formax, :go2]
+    @vendors [:amazon, :microsoft, :netflix, :google, :flyio]
     field :status, Ecto.Enum, values: [:pending, :paid, :cleared], default: :pending
     field :date, :date
     field :amount, :float
