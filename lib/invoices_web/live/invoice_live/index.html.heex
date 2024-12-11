@@ -1,0 +1,138 @@
+<.header>
+  <div class="flex justify-between items-center">
+    <h1 class="text-3xl font-semibold text-white rounded-2xl  ">
+      Listing Invoices
+    </h1>
+    <.link patch={~p"/invoices/new"}>
+      <button class="bg-gray-900 hover:bg-gray-950 text-white hover:text-blue-100 py-2 px-4 rounded-3xl hover:rounded-full shadow-md shadow-blue-700 hover:shadow-blue-700 hover:shadow-lg">
+        New Invoice
+      </button>
+    </.link>
+  </div>
+</.header>
+
+<div class="timeline mt-6 space-y-6 ">
+  <%= for {_id, invoice} <- @streams.invoices do %>
+    <div class="relative flex items-start space-x-4">
+      <!-- Timeline indicator -->
+      <div class="flex-shrink-0">
+        <span class={
+          case invoice.status do
+            :paid -> "bg-teal-500 block w-4 h-4 rounded-full"
+            :pending -> "bg-rose-500 block w-4 h-4 rounded-full"
+            :cleared -> "bg-green-600 block w-4 h-4 rounded-full"
+            _ -> "bg-gray-400 block w-4 h-4 rounded-full"
+          end
+        }>
+        </span>
+      </div>
+      <!-- Invoice Card -->
+      <.link patch={~p"/invoices/#{invoice}"}>
+        <div class={
+          case invoice.status do
+            :paid ->
+              "flex-1 bg-cyan-50 shadow-md shadow-gray-400 rounded-lg p-4 hover:bg-teal-100 hover:shadow-teal-400"
+
+            :pending ->
+              "flex-1 bg-rose-50 shadow-md shadow-gray-400 rounded-lg p-4 hover:bg-rose-100 hover:shadow-rose-400"
+
+            :cleared ->
+              "flex-1 bg-green-50 shadow-md shadow-gray-400 rounded-lg p-4 hover:bg-green-100 hover:shadow-green-400"
+
+            _ ->
+              "flex-1 bg-white shadow-md shadow-gray-400 rounded-lg p-4 hover:bg-gray-50 hover:shadow-blue-600"
+          end
+        }>
+          <div class="flex justify-between items-center">
+            <h3 class="text-lg font-medium text-gray-800">
+              Invoice ID: <span class="text-gray-600">{invoice.invId}</span>
+            </h3>
+            <span class="text-sm text-gray-500">{invoice.date}</span>
+          </div>
+          <div class="mt-2">
+            <p class="text-gray-800 font-medium">Amount: ${invoice.amount}</p>
+            <p class="text-gray-700">Vendor: {invoice.vendor}</p>
+            <p class={
+              case invoice.status do
+                :paid -> "text-teal-500 font-bold"
+                :pending -> "text-rose-400 font-semibold"
+                :cleared -> "text-green-600 font-semibold"
+                _ -> "text-gray-600"
+              end
+            }>
+              Status: {invoice.status}
+            </p>
+          </div>
+          <!-- Actions -->
+          <div class="mt-4 flex space-x-4">
+            <.link patch={~p"/invoices/#{invoice}/edit"}>
+              <button class={
+                case invoice.status do
+                  :pending ->
+                    "bg-rose-50 hover:bg-orange-600 text-rose-500 hover:text-white py-2 px-4 rounded-3xl hover:rounded-full shadow-md shadow-red-300 hover:shadow-red-400 hover:shadow-lg"
+
+                  :paid ->
+                    "bg-cyan-50 hover:bg-orange-600 text-teal-500 hover:text-white py-2 px-4 rounded-3xl hover:rounded-full shadow-md shadow-cyan-500 hover:shadow-gray-300 hover:shadow-lg"
+
+                  :cleared ->
+                    "bg-green-50 hover:bg-orange-600 text-green-500 hover:text-white py-2 px-4 rounded-3xl hover:rounded-full shadow-md shadow-teal-500 hover:shadow-gray-300 hover:shadow-lg"
+
+                  _ ->
+                    "bg-blue-700 hover:bg-blue-500 text-blue hover:text-yellow-100 py-2 px-4 rounded-3xl hover:rounded-full shadow-md shadow-blue-900 hover:shadow-gray-300 hover:shadow-lg"
+                end
+              }>
+                Edit
+              </button>
+            </.link>
+            <.link
+              phx-click={JS.push("delete", value: %{id: invoice.id}) |> hide("##{_id}")}
+              data-confirm="Are you sure?"
+            >
+              <button class={
+                case invoice.status do
+                  :pending ->
+                    "bg-rose-50 hover:bg-red-600 text-rose-500 hover:text-white py-2 px-4 rounded-3xl hover:rounded-full shadow-md shadow-red-300 hover:shadow-red-400 hover:shadow-lg"
+
+                  :paid ->
+                    "bg-cyan-50 hover:bg-red-600 text-teal-500 hover:text-white py-2 px-4 rounded-3xl hover:rounded-full shadow-md shadow-cyan-500 hover:shadow-gray-300 hover:shadow-lg"
+
+                  :cleared ->
+                    "bg-green-50 hover:bg-red-600 text-green-500 hover:text-white py-2 px-4 rounded-3xl hover:rounded-full shadow-md shadow-teal-500 hover:shadow-gray-300 hover:shadow-lg"
+
+                  _ ->
+                    "bg-blue-700 hover:bg-red-500 text-blue hover:text-yellow-100 py-2 px-4 rounded-3xl hover:rounded-full shadow-md shadow-blue-900 hover:shadow-gray-300 hover:shadow-lg"
+                end
+              }>
+                Delete
+              </button>
+            </.link>
+          </div>
+        </div>
+      </.link>
+    </div>
+  <% end %>
+</div>
+
+<.modal :if={@live_action in [:new]} id="invoice-modal" show on_cancel={JS.patch(~p"/invoices")}>
+  <.live_component
+    module={InvoicesWeb.InvoiceLive.FormComponent}
+    id={@invoice.id || :new}
+    title={@page_title}
+    action={@live_action}
+    invoice={@invoice}
+    patch={~p"/invoices"}
+    class="p-6 bg-gray-50 rounded-lg shadow-lg"
+  />
+</.modal>
+
+<.modal :if={@live_action in [:edit]} id="invoice-modal" show on_cancel={JS.patch(~p"/invoices")}>
+  <.live_component
+    module={InvoicesWeb.InvoiceLive.FormComponentEdit}
+    id={@invoice.id || :edit}
+    title={@page_title}
+    action={@live_action}
+    invoice={@invoice}
+    patch={~p"/invoices"}
+    class="p-6 bg-gray-50 rounded-lg shadow-lg"
+  />
+</.modal>

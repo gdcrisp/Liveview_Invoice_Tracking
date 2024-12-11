@@ -1,0 +1,18 @@
+<header class="px-4 sm:px-6 lg:px-8 bg-white">
+  <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-sm bg-white ">
+    <div class="flex items-center gap-4">
+      <a href="/" class="bg-white">
+        <img src={~p"/images/logo.svg"} width="48" />
+      </a>
+      <p class="bg-teal-100 text-blue-600 rounded-xl px-2 font-semibold text-xl leading-8">
+        Payroll Processors Invoice Managment
+      </p>
+    </div>
+  </div>
+</header>
+<main class="px-4 py-20 sm:px-6 lg:px-8 bg-gray-800">
+  <div class="mx-auto max-w-2xl">
+    <.flash_group flash={@flash} />
+    {@inner_content}
+  </div>
+</main>
