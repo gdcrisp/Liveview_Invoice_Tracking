@@ -26,6 +26,8 @@ erl_crash.dump
 /config/prod.exs
 /config/runtime.exs
 /config/test.exs
+/config/
+
 # Ignore package tarball (built via "mix hex.build").
 invoices-*.tar
 
